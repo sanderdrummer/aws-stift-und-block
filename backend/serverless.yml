@@ -12,6 +12,7 @@ custom:
 # Add the serverless-webpack plugin
 plugins:
   - serverless-webpack
+  - serverless-offline
 
 provider:
   name: aws
@@ -22,6 +23,17 @@ provider:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
 
 functions:
+  connect:
+    handler: handler.connect
+    events:
+      - websocket:
+          route: $connect
+  dice:
+    handler: handler.dice
+    events:
+      - websocket:
+          route: $default
+
   hello:
     handler: handler.hello
     events:
