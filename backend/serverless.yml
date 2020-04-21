@@ -1,10 +1,11 @@
 service:
   name: aws-stift-und-block
-# app and org for use with dashboard.serverless.com
+#app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
 
 custom:
+  corsOrigin: "*"
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
@@ -33,10 +34,3 @@ functions:
     events:
       - websocket:
           route: $default
-
-  hello:
-    handler: handler.hello
-    events:
-      - http:
-          method: get
-          path: hello

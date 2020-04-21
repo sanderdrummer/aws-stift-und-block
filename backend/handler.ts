@@ -1,43 +1,79 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-// import * as AWS from "aws-sdk";
+import * as AWS from "aws-sdk";
 
 import "source-map-support/register";
+import { updateGameState } from "./src/game-state";
 
-export const hello: APIGatewayProxyHandler = async (event, _context) => {
+export const getMeta = (event) => {
+  const domain = event.requestContext.domainName;
+  const stage = event.requestContext.stage;
+  const connectionId = event.requestContext.connectionId;
+  const callbackUrlForAWS = `https://${domain}/${stage}`;
+
   return {
-    statusCode: 200,
-    body: JSON.stringify(
-      {
-        message:
-          "Go Serverless Webpack (Typescript) v1.0! Your function executed successfully!",
-        input: event,
-      },
-      null,
-      2
-    ),
+    connectionId,
+    callbackUrlForAWS,
   };
 };
 
-export const connect = (event, context, cb) => {
-  cb(null, {
+export const connect = (event) => {
+  const { connectionId } = getMeta(event);
+  updateGameState({ type: "removePlayer", id: connectionId });
+  return {
     statusCode: 200,
     body: "Connected.",
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
+};
+
+const sendMessageToClient = (url, connectionId, payload) =>
+  new Promise((resolve, reject) => {
+    const apigatewaymanagementapi = new AWS.ApiGatewayManagementApi({
+      apiVersion: "2018-11-29",
+      endpoint: "http://localhost:3001",
+      // endpoint: url
+    });
+
+    apigatewaymanagementapi.postToConnection(
+      {
+        ConnectionId: connectionId, // connectionId of the receiving ws-client
+        Data: JSON.stringify(payload),
+      },
+      (err, data) => {
+        if (err) {
+          console.log("err is", err);
+          reject(err);
+        }
+        resolve(data);
+      }
+    );
+  });
+
+const notifyPlayers = (payload, url) => {
+  payload.players.forEach(async (player) => {
+    try {
+      await sendMessageToClient(url, player.id, payload);
+    } catch (e) {
+      console.log(e);
+    }
   });
 };
 
-export const dice = async (event, _context, cb) => {
-  // const client = new AWS.ApiGatewayManagementApi({
-  //   apiVersion: "2018-11-29",
-  //   endpoint: `https://${event.requestContext.domainName}/${event.requestContext.stage}`,
-  // });
-  // await client
-  //   .postToConnection({
-  //     ConnectionId: event.requestContext.connectionId,
-  //     Data: `default route received: ${event.body}`,
-  //   })
-  //   .promise();
-  // cb(null, {
-  //   statusCode: 200,
-  //   body: "Sent.",
-  // });
+export const dice = async (event) => {
+  const { callbackUrlForAWS, connectionId } = getMeta(event);
+  if (event.body) {
+    const action = JSON.parse(event.body);
+    const nextState = updateGameState({ ...action, connectionId });
+    console.log(JSON.stringify({ action, nextState }));
+    notifyPlayers(nextState, callbackUrlForAWS);
+  }
+
+  return {
+    statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
 };
