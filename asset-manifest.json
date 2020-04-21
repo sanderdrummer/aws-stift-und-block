@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/aws-stift-und-block/static/css/main.5ecd60fb.chunk.css",
+    "main.js": "/aws-stift-und-block/static/js/main.ea3f3e00.chunk.js",
+    "main.js.map": "/aws-stift-und-block/static/js/main.ea3f3e00.chunk.js.map",
+    "runtime-main.js": "/aws-stift-und-block/static/js/runtime-main.d2e4e5cc.js",
+    "runtime-main.js.map": "/aws-stift-und-block/static/js/runtime-main.d2e4e5cc.js.map",
+    "static/js/2.db675918.chunk.js": "/aws-stift-und-block/static/js/2.db675918.chunk.js",
+    "static/js/2.db675918.chunk.js.map": "/aws-stift-und-block/static/js/2.db675918.chunk.js.map",
+    "index.html": "/aws-stift-und-block/index.html",
+    "precache-manifest.67e87f9a9e4ccbf64b127e1dd4607b99.js": "/aws-stift-und-block/precache-manifest.67e87f9a9e4ccbf64b127e1dd4607b99.js",
+    "service-worker.js": "/aws-stift-und-block/service-worker.js",
+    "static/css/main.5ecd60fb.chunk.css.map": "/aws-stift-und-block/static/css/main.5ecd60fb.chunk.css.map",
+    "static/js/2.db675918.chunk.js.LICENSE.txt": "/aws-stift-und-block/static/js/2.db675918.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.d2e4e5cc.js",
+    "static/js/2.db675918.chunk.js",
+    "static/css/main.5ecd60fb.chunk.css",
+    "static/js/main.ea3f3e00.chunk.js"
+  ]
+}
