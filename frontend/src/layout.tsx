@@ -1,5 +1,10 @@
 import React from "react";
-import { HashRouter as Router, Switch, Route, Link } from "react-router-dom";
+import {
+  HashRouter as Router,
+  Switch,
+  Route,
+  useHistory,
+} from "react-router-dom";
 import {
   AppBar,
   ListItem,
@@ -8,23 +13,25 @@ import {
   IconButton,
   Toolbar,
   Typography,
+  Button,
 } from "@material-ui/core";
 import { Menu as MenuIcon } from "@material-ui/icons";
 
 import { QuixxPage } from "./quixx/quixx-page";
 
 export const Header: React.FC = () => {
+  const history = useHistory();
   return (
     <AppBar position="static">
       <Toolbar>
         <IconButton edge="start" color="inherit" aria-label="open drawer">
           <MenuIcon />
         </IconButton>
-        <Link to="/">
-          <Typography variant="h6" noWrap>
+        <Button onClick={() => history.push("/")}>
+          <Typography color="textPrimary" variant="h6" noWrap>
             STIFT UND BLOCK
           </Typography>
-        </Link>
+        </Button>
       </Toolbar>
     </AppBar>
   );
@@ -33,12 +40,13 @@ export const Header: React.FC = () => {
 export const quixxPath = "/quixx";
 
 export const Home = () => {
+  const history = useHistory();
   return (
     <div>
       <List>
-        <Link to={quixxPath}>
-          <ListItem button>QUIXX</ListItem>
-        </Link>
+        <ListItem onClick={() => history.push(quixxPath)} button>
+          QUIXX
+        </ListItem>
       </List>
     </div>
   );

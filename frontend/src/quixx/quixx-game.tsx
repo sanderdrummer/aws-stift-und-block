@@ -20,6 +20,7 @@ import {
   finishRound,
 } from "./store";
 import { useSelector, useDispatch } from "react-redux";
+import { animated, useSpring } from "react-spring";
 
 const getHistory = (state) => state.stream.rounds;
 
@@ -37,8 +38,42 @@ export const RollDice = () => {
   const shouldFinishRound = userName === currentRound.currentPlayer.name;
 
   return (
-    <DiceCard name={currentRound.currentPlayer.name} dice={currentRound.dice}>
+    <DiceCard
+      shouldAnimate
+      action={
+        <>
+          {isYourTurn && currentRound.finished && (
+            <Button variant="contained" color="primary" onClick={nextRound}>
+              würfeln
+            </Button>
+          )}
+          {shouldFinishRound && !currentRound.finished && (
+            <Button variant="contained" color="primary" onClick={finishRound}>
+              zug beenden
+            </Button>
+          )}
+        </>
+      }
+      name={currentRound.currentPlayer.name}
+      dice={currentRound.dice}
+    >
       <Box>
+        {isYourTurn && currentRound.finished && (
+          <p>du bist dran mit würfeln!</p>
+        )}
+        {shouldFinishRound && !currentRound.finished && (
+          <p>du musst den zug noch beenden</p>
+        )}
+        {!isYourTurn && (
+          <p>
+            {currentRound.finished
+              ? `warte bis ${currentRound.nextPlayer.name} gewürfelt hat`
+              : `warte bis ${currentRound.currentPlayer.name} fertig ist`}
+          </p>
+        )}
+      </Box>
+      <Divider />
+      <Box mt={3}>
         <Button onClick={() => setShow(true)}>
           vergangene runden anzeigen
         </Button>
@@ -57,30 +92,30 @@ export const RollDice = () => {
           </Box>
         </Drawer>
       </Box>
-      <Divider />
-      <Box>
-        {isYourTurn && currentRound.finished && (
-          <Button onClick={nextRound}>du bist dran mit würfeln!</Button>
-        )}
-        {shouldFinishRound && !currentRound.finished && (
-          <Button onClick={finishRound}>zug beenden</Button>
-        )}
-        {!isYourTurn && (
-          <p>
-            {currentRound.finished
-              ? `warte bis ${currentRound.nextPlayer.name} gewürfelt hat`
-              : `warte bis ${currentRound.currentPlayer.name} fertig ist`}
-          </p>
-        )}
-      </Box>
     </DiceCard>
   );
 };
 
-const DiceCard = ({ name, dice, children = undefined }) => {
+const DiceCard = ({
+  action = undefined,
+  name,
+  dice,
+  children = undefined,
+  shouldAnimate = false,
+}) => {
+  const [animate, setAnimate] = React.useState(!shouldAnimate);
+  const props = useSpring({ opacity: animate ? 1 : 0 });
+  React.useEffect(() => {
+    if (shouldAnimate) {
+      setAnimate(false);
+      setTimeout(() => {
+        setAnimate(true);
+      }, 500);
+    }
+  }, [JSON.stringify(dice)]);
   return (
     <Card>
-      <CardHeader title={`${name} hat gewürfelt`} />
+      <CardHeader title={`${name} hat gewürfelt`} action={action} />
       <Box
         justifyContent="center"
         justifyItems="center"
@@ -89,20 +124,22 @@ const DiceCard = ({ name, dice, children = undefined }) => {
         mt={5}
         display="flex"
       >
-        {dice.map(({ color, value }) => (
-          <Box
-            p={2}
-            fontSize={18}
-            mr={1}
-            mt={1}
-            borderRadius={12}
-            display="flex"
-            alignItems="center"
-            justifyItems="center"
-            style={{ background: color }}
-          >
-            {value}
-          </Box>
+        {dice.map(({ value, color }) => (
+          <animated.div style={props}>
+            <Box
+              p={2}
+              fontSize={18}
+              mr={1}
+              mt={1}
+              borderRadius={12}
+              display="flex"
+              alignItems="center"
+              justifyItems="center"
+              style={{ background: color }}
+            >
+              {value}
+            </Box>
+          </animated.div>
         ))}
       </Box>
 
@@ -355,8 +392,6 @@ export const QuixxBlock = () => {
     localStorage.setItem(QUIXX_KEY, JSON.stringify(fields));
   }, [fields]);
 
-  console.log({ currentRound });
-
   if (!currentRound) {
     return (
       <Box mt={6} mb={6}>
@@ -366,7 +401,7 @@ export const QuixxBlock = () => {
   }
   return (
     <>
-      <Box m={6} />
+      <Box m={6} p={6} />
       <Card>
         <CardHeader title="QUIXX Block" />
         <CardContent>
@@ -429,9 +464,19 @@ export const Players = () => {
         </Card>
       ) : (
         <Card>
+          <CardHeader title="Dem Spiel beitreten" />
           <CardContent>
-            <TextField value={name} onChange={(e) => setName(e.target.value)} />
+            <TextField
+              fullWidth
+              label="Spielername"
+              variant="outlined"
+              margin="normal"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
             <Button
+              variant="contained"
+              color="primary"
               disabled={name.length === 0}
               onClick={() => {
                 addPlayer(name);
@@ -445,7 +490,7 @@ export const Players = () => {
       )}
       <Box mt={6} />
       <Card>
-        <CardHeader title="es wollen mitspielen:" />
+        <CardHeader title="In der Lobby:" />
         <CardContent>
           {players.map((player) => (
             <p key={player.name}>{player.name}</p>

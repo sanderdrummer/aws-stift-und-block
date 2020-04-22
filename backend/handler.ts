@@ -1,7 +1,7 @@
 import * as AWS from "aws-sdk";
 
 import "source-map-support/register";
-import { updateGameState } from "./src/game-state";
+import { updateGameState, state } from "./src/game-state";
 
 export const getMeta = (event) => {
   const domain = event.requestContext.domainName;
@@ -44,8 +44,8 @@ const sendMessageToClient = (url, connectionId, payload) =>
     );
   });
 
-const notifyPlayers = (payload, url) => {
-  payload.players.forEach(async (player) => {
+const notifyPlayers = (players, payload, url) => {
+  return players.map(async (player) => {
     try {
       await sendMessageToClient(url, player.id, payload);
     } catch (e) {
@@ -58,9 +58,20 @@ export const dice = async (event, _, callback) => {
   const { callbackUrlForAWS, connectionId } = getMeta(event);
   if (event.body) {
     const action = JSON.parse(event.body);
-    const nextState = updateGameState({ ...action, connectionId });
-    console.log(JSON.stringify({ action, nextState }));
-    notifyPlayers(nextState, callbackUrlForAWS);
+    if (action.type === "newGame") {
+      await Promise.all(
+        notifyPlayers(
+          state.players,
+          { rounds: [], players: [] },
+          callbackUrlForAWS
+        )
+      );
+      updateGameState(action);
+    } else {
+      const nextState = updateGameState({ ...action, connectionId });
+      console.log(JSON.stringify({ action, nextState }));
+      notifyPlayers(nextState.players, nextState, callbackUrlForAWS);
+    }
   }
   callback(null, { statusCode: 200, body: "Dice" });
 };
