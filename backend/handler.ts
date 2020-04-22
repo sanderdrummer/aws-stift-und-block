@@ -1,4 +1,3 @@
-import { APIGatewayProxyHandler } from "aws-lambda";
 import * as AWS from "aws-sdk";
 
 import "source-map-support/register";
@@ -16,16 +15,10 @@ export const getMeta = (event) => {
   };
 };
 
-export const connect = (event) => {
+export const connect = (event, _, callback) => {
   const { connectionId } = getMeta(event);
   updateGameState({ type: "removePlayer", id: connectionId });
-  return {
-    statusCode: 200,
-    body: "Connected.",
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-    },
-  };
+  callback(null, { statusCode: 200, body: "Connected" });
 };
 
 const sendMessageToClient = (url, connectionId, payload) =>
@@ -33,7 +26,7 @@ const sendMessageToClient = (url, connectionId, payload) =>
     const apigatewaymanagementapi = new AWS.ApiGatewayManagementApi({
       apiVersion: "2018-11-29",
       endpoint: "http://localhost:3001",
-      // endpoint: url
+      // endpoint: url,
     });
 
     apigatewaymanagementapi.postToConnection(
@@ -61,7 +54,7 @@ const notifyPlayers = (payload, url) => {
   });
 };
 
-export const dice = async (event) => {
+export const dice = async (event, _, callback) => {
   const { callbackUrlForAWS, connectionId } = getMeta(event);
   if (event.body) {
     const action = JSON.parse(event.body);
@@ -69,11 +62,5 @@ export const dice = async (event) => {
     console.log(JSON.stringify({ action, nextState }));
     notifyPlayers(nextState, callbackUrlForAWS);
   }
-
-  return {
-    statusCode: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-    },
-  };
+  callback(null, { statusCode: 200, body: "Dice" });
 };

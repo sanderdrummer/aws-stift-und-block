@@ -1,8 +1,7 @@
 service:
   name: aws-stift-und-block
-#app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
+  logs:
+    websocket: true
 
 custom:
   corsOrigin: "*"
@@ -27,10 +26,8 @@ functions:
   connect:
     handler: handler.connect
     events:
-      - websocket:
-          route: $connect
+      - websocket: $connect
   dice:
     handler: handler.dice
     events:
-      - websocket:
-          route: $default
+      - websocket: $default
