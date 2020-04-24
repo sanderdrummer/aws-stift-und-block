@@ -18,7 +18,7 @@ import {
 import { Menu as MenuIcon } from "@material-ui/icons";
 
 import { QuixxPage } from "./quixx/quixx-page";
-
+import { BingoPage } from "./bingo";
 export const Header: React.FC = () => {
   const history = useHistory();
   return (
@@ -38,6 +38,7 @@ export const Header: React.FC = () => {
 };
 
 export const quixxPath = "/quixx";
+export const bingoPath = "/bingo";
 
 export const Home = () => {
   const history = useHistory();
@@ -46,6 +47,9 @@ export const Home = () => {
       <List>
         <ListItem onClick={() => history.push(quixxPath)} button>
           QUIXX
+        </ListItem>
+        <ListItem onClick={() => history.push(bingoPath)} button>
+          Bingo
         </ListItem>
       </List>
     </div>
@@ -59,6 +63,7 @@ export const Layout: React.FC = () => {
       <Container>
         <Switch>
           <Route path={quixxPath} children={<QuixxPage />} />
+          <Route path={bingoPath} children={<BingoPage />} />
           <Route path="/" children={<Home />} />
         </Switch>
       </Container>

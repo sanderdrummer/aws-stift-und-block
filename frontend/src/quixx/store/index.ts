@@ -1,13 +1,10 @@
 import { createStore, combineReducers } from "redux";
 import { quixxState, userReducer } from "./reducer";
+import { store } from "../../store";
 
 const API_URL =
   process.env.REACT_APP_API ||
   "wss://dlujlom9wh.execute-api.us-east-1.amazonaws.com/dev";
-
-export const store = createStore(
-  combineReducers({ stream: quixxState, user: userReducer })
-);
 
 const socket = new WebSocket(API_URL);
 

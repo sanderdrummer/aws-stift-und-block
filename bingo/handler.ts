@@ -1,7 +1,7 @@
 import * as AWS from "aws-sdk";
 
 import "source-map-support/register";
-import { updateGameState, state } from "./src/game-state";
+import * as Bingo from "./bingo";
 
 export const getMeta = (event) => {
   const domain = event.requestContext.domainName;
@@ -16,8 +16,6 @@ export const getMeta = (event) => {
 };
 
 export const connect = (event, _, callback) => {
-  const { connectionId } = getMeta(event);
-  updateGameState({ type: "removePlayer", id: connectionId });
   callback(null, { statusCode: 200, body: "Connected" });
 };
 
@@ -37,6 +35,7 @@ const sendMessageToClient = (url, connectionId, payload) =>
       (err, data) => {
         if (err) {
           console.log("err is", err);
+          Bingo.removePlayer(connectionId);
           reject(err);
         }
         resolve(data);
@@ -54,24 +53,21 @@ const notifyPlayers = (players, payload, url) => {
   });
 };
 
-export const dice = async (event, _, callback) => {
+export const draw = async (event, _, cb) => {
   const { callbackUrlForAWS, connectionId } = getMeta(event);
   if (event.body) {
+    console.log(event.body);
     const action = JSON.parse(event.body);
     if (action.type === "newGame") {
       await Promise.all(
-        notifyPlayers(
-          state.players,
-          { rounds: [], players: [] },
-          callbackUrlForAWS
-        )
+        notifyPlayers(Bingo.players, { type: "newGame" }, callbackUrlForAWS)
       );
-      updateGameState(action);
+      Bingo.handleAction(action);
     } else {
-      const nextState = updateGameState({ ...action, connectionId });
+      const nextState = Bingo.handleAction({ ...action }, { id: connectionId });
       console.log(JSON.stringify({ action, nextState }));
-      notifyPlayers(nextState.players, nextState, callbackUrlForAWS);
+      notifyPlayers(Bingo.players, nextState, callbackUrlForAWS);
     }
   }
-  callback(null, { statusCode: 200, body: "Dice" });
+  cb(null, { statusCode: 200, body: "drawBingo" });
 };

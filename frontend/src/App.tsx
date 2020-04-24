@@ -1,6 +1,8 @@
 import React from "react";
+import { Provider } from "react-redux";
 import { Layout } from "./layout";
 import { createMuiTheme, ThemeProvider, CssBaseline } from "@material-ui/core";
+import { store } from "./store";
 
 function App() {
   const theme = createMuiTheme({
@@ -9,10 +11,12 @@ function App() {
     },
   });
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Layout />
-    </ThemeProvider>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Layout />
+      </ThemeProvider>
+    </Provider>
   );
 }
 

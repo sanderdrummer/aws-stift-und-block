@@ -1,0 +1,7 @@
+wscat -c ws://localhost:3001
+
+wscat -c ws://dlujlom9wh.execute-api.us-east-1.amazonaws.com/dev
+
+
+  wss://dlujlom9wh.execute-api.us-east-1.amazonaws.com/dev
+    wss://a2eqr0fgv1.execute-api.us-east-1.amazonaws.com/dev
